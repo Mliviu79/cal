@@ -5,8 +5,8 @@ import { Controller, useForm } from "react-hook-form";
 import type { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 
-import { Dialog } from "@calcom/features/components/controlled-dialog";
 import type { Language } from "@calcom/features/calAIPhone/providers/retellAI/types";
+import { Dialog } from "@calcom/features/components/controlled-dialog";
 import { CAL_AI_PHONE_NUMBER_MONTHLY_PRICE } from "@calcom/lib/constants";
 import { formatPhoneNumber } from "@calcom/lib/formatPhoneNumber";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
@@ -486,9 +486,7 @@ export function AgentConfigurationSheet({
             {activeTab === "prompt" && (
               <div className="space-y-4">
                 <div>
-                  <Label className="text-emphasis mb-1 block text-sm font-medium">
-                    {t("language")}
-                  </Label>
+                  <Label className="text-emphasis mb-1 block text-sm font-medium">{t("language")}</Label>
                   <Controller
                     name="language"
                     control={agentForm.control}
@@ -504,9 +502,7 @@ export function AgentConfigurationSheet({
                   />
                 </div>
                 <div>
-                  <Label className="text-emphasis mb-1 block text-sm font-medium">
-                    {t("voice")}
-                  </Label>
+                  <Label className="text-emphasis mb-1 block text-sm font-medium">{t("voice")}</Label>
                   <p className="text-subtle mb-1.5 text-xs">{t("select_voice_for_agent")}</p>
                   <Button
                     type="button"
@@ -709,7 +705,7 @@ export function AgentConfigurationSheet({
                               <DropdownMenuItem>
                                 <DropdownItem
                                   type="button"
-                                  StartIcon="monitor"
+                                  StartIcon="video"
                                   onClick={() => {
                                     setIsWebCallDialogOpen(true);
                                   }}>
