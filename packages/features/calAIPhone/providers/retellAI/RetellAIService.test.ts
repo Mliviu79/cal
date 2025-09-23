@@ -72,7 +72,7 @@ vi.mock("@calcom/lib/checkRateLimitAndThrowError", () => ({
   checkRateLimitAndThrowError: vi.fn(),
 }));
 
-vi.mock("@calcom/ee/api-keys/lib/apiKeys", () => ({
+vi.mock("@calcom/features/api-keys/lib/apiKeys", () => ({
   generateUniqueAPIKey: vi.fn().mockReturnValue(["hashed-key", "api-key"]),
 }));
 

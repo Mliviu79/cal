@@ -1,6 +1,6 @@
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
-import type { ComponentProps } from "react";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ComponentProps, MouseEventHandler } from "react";
 import { forwardRef } from "react";
 
 import classNames from "@calcom/ui/classNames";
@@ -141,21 +141,20 @@ type DropdownItemProps = {
 
 type ButtonOrLinkProps = ComponentProps<"button"> & ComponentProps<"a">;
 
-export function ButtonOrLink({ href, ...props }: ButtonOrLinkProps) {
+export function ButtonOrLink({ href, children, ...props }: ButtonOrLinkProps) {
   const isLink = typeof href !== "undefined";
-  const ButtonOrLink = isLink ? "a" : "button";
-
-  const content = <ButtonOrLink {...props} />;
 
   if (isLink) {
+    const { onClick, ...anchorRest } = props as AnchorHTMLAttributes<HTMLAnchorElement>;
     return (
-      <Link href={href} legacyBehavior>
-        {content}
+      <Link href={href} {...anchorRest} onClick={onClick as MouseEventHandler<HTMLAnchorElement>}>
+        {children}
       </Link>
     );
   }
 
-  return content;
+  const buttonProps = props as ButtonHTMLAttributes<HTMLButtonElement>;
+  return <button {...buttonProps}>{children}</button>;
 }
 
 export const DropdownItem = (props: DropdownItemProps) => {

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import findValidApiKey from "@calcom/features/ee/api-keys/lib/findValidApiKey";
+import findValidApiKey from "@calcom/features/api-keys/lib/findValidApiKey";
 import { listBookings } from "@calcom/features/webhooks/lib/scheduleTrigger";
 import { defaultHandler } from "@calcom/lib/server/defaultHandler";
 import { defaultResponder } from "@calcom/lib/server/defaultResponder";

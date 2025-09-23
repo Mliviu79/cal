@@ -216,11 +216,6 @@ export const NavigationItem: React.FC<{
             ) : (
               <SkeletonText className="h-[20px] w-full" />
             )}
-            {item.name === "workflows" && (
-              <Badge startIcon="sparkles" variant="purple">
-                Cal.ai
-              </Badge>
-            )}
           </Link>
         </Tooltip>
       )}

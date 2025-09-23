@@ -235,29 +235,15 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, ButtonPr
     CustomStartIcon,
     EndIcon,
     shallow,
+    href,
     // attributes propagated from `HTMLAnchorProps` or `HTMLButtonProps`
     ...passThroughProps
   } = props;
   // Buttons are **always** disabled if we're in a `loading` state
   const disabled = props.disabled || loading;
   // If pass an `href`-attr is passed it's `<a>`, otherwise it's a `<button />`
-  const isLink = typeof props.href !== "undefined";
-  const elementType = isLink ? "a" : "button";
-  const element = React.createElement(
-    elementType,
-    {
-      ...passThroughProps,
-      disabled,
-      type: !isLink ? type : undefined,
-      ref: forwardedRef,
-      className: classNames(buttonClasses({ color, size, loading, variant }), props.className),
-      // if we click a disabled button, we prevent going through the click handler
-      onClick: disabled
-        ? (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-            e.preventDefault();
-          }
-        : props.onClick,
-    },
+  const isLink = typeof href !== "undefined";
+  const content = (
     <>
       {CustomStartIcon ||
         (StartIcon && (
@@ -283,7 +269,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, ButtonPr
         ))}
       <div
         className={classNames(
-          "contents", // This makes the div behave like it doesn't exist in the layout
+          "contents",
           loading ? "invisible" : "visible",
           variant === "fab" ? "hidden md:contents" : "",
           "group-active:translate-y-[0.5px]"
@@ -332,18 +318,62 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, ButtonPr
     </>
   );
 
-  return props.href ? (
-    <Link data-testid="link-component" passHref href={props.href} shallow={shallow && shallow} legacyBehavior>
-      {element}
-    </Link>
-  ) : (
+  const className = classNames(buttonClasses({ color, size, loading, variant }), props.className);
+
+  const handleClick: React.MouseEventHandler<HTMLElement> | undefined = disabled
+    ? (event) => {
+        event.preventDefault();
+      }
+    : props.onClick;
+
+  const { disabled: _discardDisabled, ...restProps } = passThroughProps as {
+    disabled?: boolean;
+  } & (React.ButtonHTMLAttributes<HTMLButtonElement> | React.AnchorHTMLAttributes<HTMLAnchorElement>);
+
+  const buttonElement = !isLink ? (
+    <button
+      {...(restProps as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+      disabled={disabled}
+      type={type}
+      ref={forwardedRef as React.ForwardedRef<HTMLButtonElement>}
+      className={className}
+      onClick={handleClick}>
+      {content}
+    </button>
+  ) : null;
+
+  const linkElement = isLink
+    ? (() => {
+        const { target, rel, onClick: _anchorOnClick, ...anchorRest } =
+          restProps as React.AnchorHTMLAttributes<HTMLAnchorElement>;
+        return (
+          <Link
+            data-testid="link-component"
+            href={href!}
+            shallow={shallow && shallow}
+            className={className}
+            aria-disabled={disabled || undefined}
+            onClick={handleClick as React.MouseEventHandler<HTMLAnchorElement>}
+            ref={forwardedRef as React.ForwardedRef<HTMLAnchorElement>}
+            target={target}
+            rel={rel}
+            {...anchorRest}>
+            {content}
+          </Link>
+        );
+      })()
+    : null;
+
+  const renderedElement = isLink ? linkElement : buttonElement;
+
+  return (
     <Wrapper
       data-testid="wrapper"
       tooltip={props.tooltip}
       tooltipSide={tooltipSide}
       tooltipOffset={tooltipOffset}
       tooltipClassName={tooltipClassName}>
-      {element}
+      {renderedElement}
     </Wrapper>
   );
 });

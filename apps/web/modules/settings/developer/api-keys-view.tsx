@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react";
 
-import type { TApiKeys } from "@calcom/ee/api-keys/components/ApiKeyListItem";
-import LicenseRequired from "@calcom/ee/common/components/LicenseRequired";
 import { Dialog } from "@calcom/features/components/controlled-dialog";
-import ApiKeyDialogForm from "@calcom/features/ee/api-keys/components/ApiKeyDialogForm";
-import ApiKeyListItem from "@calcom/features/ee/api-keys/components/ApiKeyListItem";
+import ApiKeyDialogForm from "@calcom/features/api-keys/components/ApiKeyDialogForm";
+import ApiKeyListItem from "@calcom/features/api-keys/components/ApiKeyListItem";
+import type { ApiKey } from "@calcom/features/api-keys/components/types";
 import SettingsHeader from "@calcom/features/settings/appDir/SettingsHeader";
 import { APP_NAME } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
@@ -19,7 +18,7 @@ export const apiKeyModalRef = {
   current: null as null | ((show: boolean) => void),
 };
 export const apiKeyToEditRef = {
-  current: null as null | ((apiKey: (TApiKeys & { neverExpires?: boolean }) | undefined) => void),
+  current: null as null | ((apiKey: (ApiKey & { neverExpires?: boolean }) | undefined) => void),
 };
 
 export const NewApiKeyButton = () => {
@@ -45,7 +44,7 @@ const ApiKeysView = ({ apiKeys: data }: Props) => {
   const { t } = useLocale();
 
   const [apiKeyModal, setApiKeyModal] = useState(false);
-  const [apiKeyToEdit, setApiKeyToEdit] = useState<(TApiKeys & { neverExpires?: boolean }) | undefined>(
+  const [apiKeyToEdit, setApiKeyToEdit] = useState<(ApiKey & { neverExpires?: boolean }) | undefined>(
     undefined
   );
 
@@ -64,35 +63,31 @@ const ApiKeysView = ({ apiKeys: data }: Props) => {
       description={t("create_first_api_key_description", { appName: APP_NAME })}
       CTA={<NewApiKeyButton />}
       borderInShellHeader={true}>
-      <LicenseRequired>
-        <div>
-          {data?.length ? (
-            <>
-              <div className="border-subtle rounded-b-lg border border-t-0">
-                {data.map((apiKey, index) => (
-                  <ApiKeyListItem
-                    key={apiKey.id}
-                    apiKey={apiKey}
-                    lastItem={data.length === index + 1}
-                    onEditClick={() => {
-                      setApiKeyToEdit(apiKey);
-                      setApiKeyModal(true);
-                    }}
-                  />
-                ))}
-              </div>
-            </>
-          ) : (
-            <EmptyScreen
-              Icon="link"
-              headline={t("create_first_api_key")}
-              description={t("create_first_api_key_description", { appName: APP_NAME })}
-              className="rounded-b-lg rounded-t-none border-t-0"
-              buttonRaw={<NewApiKeyButton />}
-            />
-          )}
-        </div>
-      </LicenseRequired>
+      <div>
+        {data?.length ? (
+          <div className="border-subtle rounded-b-lg border border-t-0">
+            {data.map((apiKey, index) => (
+              <ApiKeyListItem
+                key={apiKey.id}
+                apiKey={apiKey}
+                isLast={data.length === index + 1}
+                onEdit={() => {
+                  setApiKeyToEdit({ ...apiKey, neverExpires: apiKey.expiresAt === null });
+                  setApiKeyModal(true);
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <EmptyScreen
+            Icon="link"
+            headline={t("create_first_api_key")}
+            description={t("create_first_api_key_description", { appName: APP_NAME })}
+            className="rounded-b-lg rounded-t-none border-t-0"
+            buttonRaw={<NewApiKeyButton />}
+          />
+        )}
+      </div>
 
       <Dialog open={apiKeyModal} onOpenChange={setApiKeyModal}>
         <DialogContent type="creation">
