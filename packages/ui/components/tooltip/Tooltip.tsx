@@ -13,7 +13,6 @@ export function Tooltip({
   onOpenChange,
   delayDuration,
   side = "top",
-  className,
   ...props
 }: {
   children: React.ReactNode;
@@ -23,7 +22,7 @@ export function Tooltip({
   defaultOpen?: boolean;
   side?: "top" | "right" | "bottom" | "left";
   onOpenChange?: (open: boolean) => void;
-} & Omit<TooltipPrimitive.TooltipContentProps, 'children'>) {
+} & TooltipPrimitive.TooltipContentProps) {
   const Content = (
     <TooltipPrimitive.Content
       {...props}
@@ -32,7 +31,7 @@ export function Tooltip({
         side === "top" && "-mt-7",
         side === "right" && "ml-2",
         "bg-inverted text-inverted relative z-50 rounded-md px-2 py-1 text-xs font-semibold shadow-lg",
-        className
+        props.className && `${props.className}`
       )}
       side={side}
       align="center">

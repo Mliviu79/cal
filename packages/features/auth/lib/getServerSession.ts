@@ -3,7 +3,7 @@ import type { GetServerSidePropsContext, NextApiRequest } from "next";
 import type { AuthOptions, Session } from "next-auth";
 import { getToken } from "next-auth/jwt";
 
-import { LicenseKeySingleton } from "@calcom/ee/common/server/LicenseKeyService";
+import { LicenseKeySingleton } from "@calcom/lib/ossOrganizations";
 import { getUserAvatarUrl } from "@calcom/lib/getAvatarUrl";
 import logger from "@calcom/lib/logger";
 import { safeStringify } from "@calcom/lib/safeStringify";

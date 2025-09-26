@@ -1,7 +1,13 @@
 import { useRouter } from "next/navigation";
 
 import dayjs from "@calcom/dayjs";
-import type { PaymentPageProps } from "@calcom/ee/payments/pages/payment";
+// OSS replacement for payment types
+interface PaymentPageProps {
+  uid: string;
+  payment: any;
+  booking: any;
+  [key: string]: any;
+}
 import { useIsEmbed } from "@calcom/embed-core/embed-iframe";
 import type { BookingResponse } from "@calcom/features/bookings/types";
 import { useCompatSearchParams } from "@calcom/lib/hooks/useCompatSearchParams";
@@ -57,7 +63,7 @@ export function getNewSearchParams(args: {
   return newSearchParams;
 }
 
-type SuccessRedirectBookingType = Pick<
+export type SuccessRedirectBookingType = Pick<
   BookingResponse | PaymentPageProps["booking"],
   "uid" | "title" | "description" | "startTime" | "endTime" | "location" | "attendees" | "user" | "responses"
 >;

@@ -5,8 +5,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { createMocks } from "node-mocks-http";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { ILicenseKeyService } from "@calcom/ee/common/server/LicenseKeyService";
-import LicenseKeyService from "@calcom/ee/common/server/LicenseKeyService";
+import type { IUsageEvent } from "@calcom/lib/ossOrganizations";
+import { LicenseKeySingleton } from "@calcom/lib/ossOrganizations";
 import { hashAPIKey } from "@calcom/features/api-keys/lib/apiKeys";
 import type { IDeploymentRepository } from "@calcom/lib/server/repository/deployment.interface";
 import prisma from "@calcom/prisma";
@@ -37,10 +37,10 @@ const mockDeploymentRepository: IDeploymentRepository = {
 };
 
 describe("Verify API key", () => {
-  let service: ILicenseKeyService;
+  let service: any;
 
   beforeEach(async () => {
-    service = await LicenseKeyService.create(mockDeploymentRepository);
+    service = await LicenseKeySingleton.getInstance(mockDeploymentRepository);
 
     vi.spyOn(service, "checkLicense");
   });

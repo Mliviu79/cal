@@ -2,7 +2,7 @@ import prismock from "../../../../../../tests/libs/__mocks__/prisma";
 
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
-import { LicenseKeySingleton } from "@calcom/ee/common/server/LicenseKeyService";
+import { LicenseKeySingleton } from "@calcom/lib/ossOrganizations";
 import { UserPermissionRole } from "@calcom/prisma/enums";
 
 import { TRPCError } from "@trpc/server";

@@ -1,14 +1,13 @@
-import { getOrgFullOrigin } from "@calcom/ee/organizations/lib/orgDomains";
-import stripe from "@calcom/features/ee/payments/server/stripe";
+import { getOrgFullOrigin } from "@calcom/lib/orgDomains";
 import logger from "@calcom/lib/logger";
 import { safeStringify } from "@calcom/lib/safeStringify";
 import { UserRepository } from "@calcom/lib/server/repository/user";
 import slugify from "@calcom/lib/slugify";
 import { prisma } from "@calcom/prisma";
-import type { Prisma } from "@calcom/prisma/client";
 import type { CreationSource } from "@calcom/prisma/enums";
 import { MembershipRole, RedirectType } from "@calcom/prisma/enums";
-import { teamMetadataSchema, teamMetadataStrictSchema } from "@calcom/prisma/zod-utils";
+import { teamMetadataSchema } from "@calcom/prisma/zod-utils";
+import type { Prisma } from "@calcom/prisma/client";
 
 import { TRPCError } from "@trpc/server";
 
@@ -276,33 +275,6 @@ async function moveTeam({
   function isMembershipNotWithOwner(membership: { userId: number }) {
     // Org owner is already a member of the team
     return membership.userId !== org.ownerId;
-  }
-  // Cancel existing stripe subscriptions once the team is migrated
-  const subscriptionId = getSubscriptionId(team.metadata);
-  if (subscriptionId) {
-    await tryToCancelSubscription(subscriptionId);
-  }
-}
-
-async function tryToCancelSubscription(subscriptionId: string) {
-  try {
-    log.debug("Canceling stripe subscription", safeStringify({ subscriptionId }));
-    return await stripe.subscriptions.cancel(subscriptionId);
-  } catch (error) {
-    log.error("Error while cancelling stripe subscription", error);
-  }
-}
-
-function getSubscriptionId(metadata: Prisma.JsonValue) {
-  const parsedMetadata = teamMetadataStrictSchema.safeParse(metadata);
-  if (parsedMetadata.success) {
-    const subscriptionId = parsedMetadata.data?.subscriptionId;
-    if (!subscriptionId) {
-      log.warn("No subscriptionId found in team metadata", safeStringify({ metadata, parsedMetadata }));
-    }
-    return subscriptionId;
-  } else {
-    log.warn(`There has been an error`, parsedMetadata.error);
   }
 }
 

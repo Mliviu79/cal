@@ -405,7 +405,7 @@ describe("inviteMember.handler Integration Tests", () => {
 
       // Act: Simulate migration by inviting the user to the organization
       await inviteMembersWithNoInviterPermissionCheck({
-        inviterName: null,
+        inviterName: undefined,
         teamId: organization.id,
         language: "en",
         creationSource: "WEBAPP" as const,
@@ -433,6 +433,58 @@ describe("inviteMember.handler Integration Tests", () => {
         regularTeam.id
       );
       expect(originalMembership?.accepted).toBe(true);
+    });
+  });
+
+  describe("Direct team invitations", () => {
+    it("invites existing users by username", async () => {
+      const team = trackTeam(
+        await createTestTeam({
+          name: "Username Team",
+          slug: "username-team",
+          isOrganization: false,
+        })
+      );
+
+      const inviterUser = trackUser(
+        await createTestUser({
+          email: "owner@example.com",
+          username: "team-owner",
+        })
+      );
+
+      await prisma.membership.create({
+        data: {
+          userId: inviterUser.id,
+          teamId: team.id,
+          role: MembershipRole.OWNER,
+          accepted: true,
+        },
+      });
+
+      const inviteeUser = trackUser(
+        await createTestUser({
+          email: "member@example.com",
+          username: "teammate",
+        })
+      );
+
+      await inviteMemberHandler({
+        ctx: {
+          user: createUserContext(inviterUser),
+          session: {} as any,
+        } as any,
+        input: {
+          teamId: team.id,
+          usernameOrEmail: inviteeUser.username ?? inviteeUser.email,
+          language: "en",
+          creationSource: "WEBAPP" as const,
+        },
+      });
+
+      const membership = await verifyMembershipExists(inviteeUser.id, team.id);
+      expect(membership).toBeTruthy();
+      expect(membership?.accepted).toBe(false);
     });
   });
 });

@@ -1,6 +1,6 @@
 import { _generateMetadata } from "app/_utils";
 
-import OrgAttributesCreatePage from "@calcom/ee/organizations/pages/settings/attributes/attributes-create-view";
+import OrgAttributesCreatePage from "@calcom/features/organizations/pages/settings/attributes/attributes-create-view";
 
 import { validateUserHasOrgAdmin } from "../../../actions/validateUserHasOrgAdmin";
 

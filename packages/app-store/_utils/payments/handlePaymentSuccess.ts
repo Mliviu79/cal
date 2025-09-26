@@ -27,10 +27,39 @@ export async function handlePaymentSuccess(paymentId: number, bookingId: number)
     status: BookingStatus.ACCEPTED,
   };
 
-  const allCredentials = await getAllCredentialsIncludeServiceAccountKey(userWithCredentials, {
-    ...booking.eventType,
-    metadata: booking.eventType?.metadata as EventTypeMetadata,
-  });
+  const eventTypeForCredentials = eventType
+    ? {
+        ...eventType,
+        metadata: eventType.metadata as EventTypeMetadata,
+      }
+    : null;
+
+  const allCredentials = await getAllCredentialsIncludeServiceAccountKey(
+    {
+      id: userWithCredentials.id,
+      username: userWithCredentials.username,
+      email: userWithCredentials.email,
+      credentials: userWithCredentials.credentials,
+    },
+    eventTypeForCredentials
+  );
+
+  const eventManagerUser = {
+    credentials: allCredentials,
+    destinationCalendar: userWithCredentials.destinationCalendar ?? null,
+  };
+
+  const bookingEventType = eventType
+    ? {
+        ...eventType,
+        metadata: eventType.metadata as Prisma.JsonValue,
+      }
+    : null;
+
+  const bookingForHandlers = {
+    ...booking,
+    eventType: bookingEventType,
+  };
 
   const isConfirmed = booking.status === BookingStatus.ACCEPTED;
 
@@ -43,7 +72,7 @@ export async function handlePaymentSuccess(paymentId: number, bookingId: number)
 
   if (isConfirmed) {
     const apps = eventTypeAppMetadataOptionalSchema.parse(eventType?.metadata?.apps);
-    const eventManager = new EventManager({ ...userWithCredentials, credentials: allCredentials }, apps);
+    const eventManager = new EventManager(eventManagerUser, apps);
     const scheduleResult = areCalendarEventsEnabled
       ? await eventManager.create(evt)
       : placeholderCreatedEvent;
@@ -80,18 +109,18 @@ export async function handlePaymentSuccess(paymentId: number, bookingId: number)
   if (!isConfirmed) {
     if (!requiresConfirmation) {
       await handleConfirmation({
-        user: { ...userWithCredentials, credentials: allCredentials },
+        user: { ...eventManagerUser, username: userWithCredentials.username },
         evt,
         prisma,
         bookingId: booking.id,
-        booking,
+        booking: bookingForHandlers as Parameters<typeof handleConfirmation>[0]["booking"],
         paid: true,
         platformClientParams: platformOAuthClient ? getPlatformParams(platformOAuthClient) : undefined,
       });
     } else {
       await handleBookingRequested({
         evt,
-        booking,
+        booking: bookingForHandlers as Parameters<typeof handleBookingRequested>[0]["booking"],
       });
       log.debug(`handling booking request for eventId ${eventType.id}`);
     }

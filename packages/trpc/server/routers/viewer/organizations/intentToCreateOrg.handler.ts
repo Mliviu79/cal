@@ -1,16 +1,16 @@
-import { LicenseKeySingleton } from "@calcom/ee/common/server/LicenseKeyService";
-import { OrganizationPaymentService } from "@calcom/features/ee/organizations/lib/OrganizationPaymentService";
 import {
-  assertCanCreateOrg,
+  LicenseKeySingleton,
   findUserToBeOrgOwner,
-} from "@calcom/features/ee/organizations/lib/server/orgCreationUtils";
+  validateOrganizationCreation,
+  createOrganizationOnboardingDraft,
+} from "@calcom/lib/ossOrganizations";
 import { IS_SELF_HOSTED } from "@calcom/lib/constants";
 import logger from "@calcom/lib/logger";
 import { safeStringify } from "@calcom/lib/safeStringify";
 import { DeploymentRepository } from "@calcom/lib/server/repository/deployment";
 import { OrganizationOnboardingRepository } from "@calcom/lib/server/repository/organizationOnboarding";
 import { prisma } from "@calcom/prisma";
-import { UserPermissionRole } from "@calcom/prisma/enums";
+import { UserPermissionRole, BillingPeriod as PrismaBillingPeriod } from "@calcom/prisma/enums";
 
 import { TRPCError } from "@trpc/server";
 
@@ -80,17 +80,42 @@ export const intentToCreateOrgHandler = async ({ input, ctx }: CreateOptions) =>
     throw new Error("organization_onboarding_already_exists");
   }
 
-  await assertCanCreateOrg({
+  const validation = await validateOrganizationCreation({
     slug,
-    isPlatform,
-    orgOwner,
+    orgOwnerId: orgOwner.id,
     restrictBasedOnMinimumPublishedTeams: !IS_USER_ADMIN,
+    isPlatform,
   });
 
-  const paymentService = new OrganizationPaymentService(ctx.user);
-  organizationOnboarding = await paymentService.createOrganizationOnboarding({
-    ...input,
-    createdByUserId: loggedInUser.id,
+  if (!validation.slugAvailable) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message:
+        validation.slugConflictType === "onboarding"
+          ? "organization_onboarding_already_exists"
+          : "organization_slug_taken",
+    });
+  }
+
+  if (!validation.ownerHasMinimumTeams) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "not_authorized",
+    });
+  }
+
+  const billingPeriodValue = (input.billingPeriod || PrismaBillingPeriod.MONTHLY) as PrismaBillingPeriod;
+  const pricePerSeatValue = input.pricePerSeat ?? 0;
+  const seatsValue = input.seats ?? 0;
+
+  organizationOnboarding = await createOrganizationOnboardingDraft({
+    createdById: loggedInUser.id,
+    orgOwnerEmail: orgOwner.email,
+    name,
+    slug,
+    billingPeriod: billingPeriodValue,
+    pricePerSeat: pricePerSeatValue,
+    seats: seatsValue,
   });
 
   log.debug("Organization creation intent successful", safeStringify({ slug, orgOwnerId: orgOwner.id }));

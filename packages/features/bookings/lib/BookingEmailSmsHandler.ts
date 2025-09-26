@@ -5,8 +5,8 @@ import dayjs from "@calcom/dayjs";
 import {
   allowDisablingHostConfirmationEmails,
   allowDisablingAttendeeConfirmationEmails,
-} from "@calcom/ee/workflows/lib/allowDisablingStandardEmails";
-import type { Workflow as WorkflowType } from "@calcom/ee/workflows/lib/types";
+} from "@calcom/features/ee/workflows/lib/allowDisablingStandardEmails";
+import type { Workflow as WorkflowType } from "@calcom/features/ee/workflows/lib/types";
 import {
   sendRoundRobinRescheduledEmailsAndSMS,
   sendRoundRobinScheduledEmailsAndSMS,
