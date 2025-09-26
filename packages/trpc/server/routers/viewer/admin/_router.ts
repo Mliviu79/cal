@@ -5,6 +5,7 @@ import { ZListMembersSchema } from "./listPaginated.schema";
 import { ZAdminLockUserAccountSchema } from "./lockUserAccount.schema";
 import { ZAdminRemoveTwoFactor } from "./removeTwoFactor.schema";
 import { ZAdminPasswordResetSchema } from "./sendPasswordReset.schema";
+import { ZAdminUpdateUserSchema } from "./updateUser.schema";
 import { ZSetSMSLockState } from "./setSMSLockState.schema";
 import { toggleFeatureFlag } from "./toggleFeatureFlag.procedure";
 import { ZAdminVerifyWorkflowsSchema } from "./verifyWorkflows.schema";
@@ -31,6 +32,10 @@ export const adminRouter = router({
   }),
   lockUserAccount: authedAdminProcedure.input(ZAdminLockUserAccountSchema).mutation(async (opts) => {
     const { default: handler } = await import("./lockUserAccount.handler");
+    return handler(opts);
+  }),
+  updateUser: authedAdminProcedure.input(ZAdminUpdateUserSchema).mutation(async (opts) => {
+    const { default: handler } = await import("./updateUser.handler");
     return handler(opts);
   }),
   toggleFeatureFlag,

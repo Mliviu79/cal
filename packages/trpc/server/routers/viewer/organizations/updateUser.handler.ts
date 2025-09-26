@@ -1,4 +1,4 @@
-import { ensureOrganizationIsReviewed } from "@calcom/ee/organizations/lib/ensureOrganizationIsReviewed";
+import { ensureOrganizationIsReviewed } from "@calcom/lib/ossOrganizations";
 import { checkAdminOrOwner } from "@calcom/features/auth/lib/checkAdminOrOwner";
 import { RoleManagementError } from "@calcom/features/pbac/domain/errors/role-management.error";
 import { RoleManagementFactory } from "@calcom/features/pbac/services/role-management.factory";

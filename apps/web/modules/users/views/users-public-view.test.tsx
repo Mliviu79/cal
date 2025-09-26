@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { describe, it, vi } from "vitest";
 
-import { getOrgFullOrigin } from "@calcom/ee/organizations/lib/orgDomains";
+import { getOrgFullOrigin } from "@calcom/lib/orgDomains";
 import { useRouterQuery } from "@calcom/lib/hooks/useRouterQuery";
 
 import UserPage from "./users-public-view";

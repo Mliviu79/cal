@@ -15,7 +15,10 @@ import { createBooking, createRecurringBooking, createInstantBooking } from "@ca
 import type { GetBookingType } from "@calcom/features/bookings/lib/get-booking";
 import type { BookerEvent } from "@calcom/features/bookings/types";
 import { getFullName } from "@calcom/features/form-builder/utils";
-import { useBookingSuccessRedirect } from "@calcom/lib/bookingSuccessRedirect";
+import {
+  useBookingSuccessRedirect,
+  type SuccessRedirectBookingType,
+} from "@calcom/lib/bookingSuccessRedirect";
 import { ErrorCode } from "@calcom/lib/errorCodes";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { localStorage } from "@calcom/lib/webstorage";
@@ -101,6 +104,22 @@ const getRescheduleBookingSuccessfulEventPayload = getBookingSuccessfulEventPayl
 export const getDryRunBookingSuccessfulEventPayload = getBaseBookingEventPayload;
 
 export const getDryRunRescheduleBookingSuccessfulEventPayload = getDryRunBookingSuccessfulEventPayload;
+
+const toSuccessRedirectBooking = (
+  booking: Partial<SuccessRedirectBookingType>
+): SuccessRedirectBookingType => {
+  return {
+    uid: booking.uid ?? "",
+    title: booking.title ?? "",
+    description: booking.description ?? "",
+    startTime: booking.startTime ?? "",
+    endTime: booking.endTime ?? "",
+    location: booking.location ?? null,
+    attendees: (booking.attendees ?? []) as SuccessRedirectBookingType["attendees"],
+    user: (booking.user ?? {}) as SuccessRedirectBookingType["user"],
+    responses: (booking.responses ?? {}) as SuccessRedirectBookingType["responses"],
+  };
+};
 export interface IUseBookingLoadingStates {
   creatingBooking: boolean;
   creatingRecurringBooking: boolean;
@@ -329,7 +348,7 @@ export const useBookings = ({
       bookingSuccessRedirect({
         successRedirectUrl: event?.data?.successRedirectUrl || "",
         query,
-        booking: booking,
+        booking: toSuccessRedirectBooking(booking),
         forwardParamsSuccessRedirect:
           event?.data?.forwardParamsSuccessRedirect === undefined
             ? true
@@ -458,7 +477,7 @@ export const useBookings = ({
       bookingSuccessRedirect({
         successRedirectUrl: event?.data?.successRedirectUrl || "",
         query,
-        booking,
+        booking: toSuccessRedirectBooking(booking),
         forwardParamsSuccessRedirect:
           event?.data?.forwardParamsSuccessRedirect === undefined
             ? true

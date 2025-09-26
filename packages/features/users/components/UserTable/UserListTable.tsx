@@ -21,7 +21,6 @@ import {
   useDataTable,
 } from "@calcom/features/data-table";
 import { useSegments } from "@calcom/features/data-table/hooks/useSegments";
-import { useOrgBranding } from "@calcom/features/ee/organizations/context/provider";
 import { WEBAPP_URL } from "@calcom/lib/constants";
 import {
   downloadAsCsv,
@@ -141,8 +140,7 @@ function UserListTableContent({
   permissions,
 }: UserListTableProps) {
   const [dynamicLinkVisible, setDynamicLinkVisible] = useQueryState("dynamicLink", parseAsBoolean);
-  const orgBranding = useOrgBranding();
-  const domain = orgBranding?.fullDomain ?? WEBAPP_URL;
+  const domain = WEBAPP_URL;
   const { t } = useLocale();
 
   const { data: session } = useSession();
@@ -650,9 +648,13 @@ function UserListTableContent({
       </DataTableWrapper>
 
       {state.deleteMember.showModal && <DeleteMemberModal state={state} dispatch={dispatch} />}
-      {state.inviteMember.showModal && <InviteMemberModal dispatch={dispatch} />}
+      {state.inviteMember.showModal && (
+        <InviteMemberModal dispatch={dispatch} roles={facetedTeamValues?.roles} />
+      )}
       {state.impersonateMember.showModal && <ImpersonationMemberModal dispatch={dispatch} state={state} />}
-      {state.changeMemberRole.showModal && <ChangeUserRoleModal dispatch={dispatch} state={state} />}
+      {state.changeMemberRole.showModal && (
+        <ChangeUserRoleModal dispatch={dispatch} state={state} roles={facetedTeamValues?.roles} />
+      )}
       {state.editSheet.showModal && <EditUserSheet dispatch={dispatch} state={state} />}
 
       {ctaContainerRef.current &&

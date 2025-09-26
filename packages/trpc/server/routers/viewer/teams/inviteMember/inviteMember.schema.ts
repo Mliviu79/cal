@@ -5,6 +5,8 @@ import { emailSchema } from "@calcom/lib/emailSchema";
 import { MembershipRole } from "@calcom/prisma/enums";
 import { CreationSource } from "@calcom/prisma/enums";
 
+const normalizeIdentifier = (value: string) => value.trim().toLowerCase();
+
 export const ZInviteMemberInputSchema = z.object({
   teamId: z.number(),
   usernameOrEmail: z
@@ -22,39 +24,47 @@ export const ZInviteMemberInputSchema = z.object({
     ])
     .transform((usernameOrEmail) => {
       if (typeof usernameOrEmail === "string") {
-        return usernameOrEmail.trim().toLowerCase();
+        return normalizeIdentifier(usernameOrEmail);
       }
       return usernameOrEmail.map((item) => {
         if (typeof item === "string") {
-          return item.trim().toLowerCase();
+          return normalizeIdentifier(item);
         }
 
         return {
           ...item,
-          email: item.email.trim().toLowerCase(),
+          email: normalizeIdentifier(item.email),
         };
       });
     })
-    .refine(
-      (value) => {
-        if (Array.isArray(value)) {
-          if (value.length > MAX_NB_INVITES) {
-            return false;
-          }
-        }
-        return true;
-      },
-      { message: `You are limited to inviting a maximum of ${MAX_NB_INVITES} users at once.` }
-    )
-    .refine(
-      (value) => {
-        if (Array.isArray(value)) {
-          return !value.some((email) => !emailSchema.safeParse(email).success);
-        }
-        return true;
-      },
-      { message: "Bulk invitations are restricted to email addresses only." }
-    ),
+    .superRefine((value, ctx) => {
+      const asArray = Array.isArray(value) ? value : [value];
+
+      if (Array.isArray(value) && value.length > MAX_NB_INVITES) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `You are limited to inviting a maximum of ${MAX_NB_INVITES} users at once.`,
+        });
+      }
+
+      const hasInvalidStringEmail = asArray.some(
+        (entry) => typeof entry === "string" && entry.includes("@") && !emailSchema.safeParse(entry).success
+      );
+      if (hasInvalidStringEmail) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Provide valid email addresses or usernames for each invitation.",
+        });
+      }
+
+      const hasEmptyIdentifier = asArray.some((entry) => typeof entry === "string" && entry.length === 0);
+      if (hasEmptyIdentifier) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Invitation entries cannot be empty.",
+        });
+      }
+    }),
   role: z.nativeEnum(MembershipRole).optional(),
   language: z.string(),
   isPlatform: z.boolean().optional(),

@@ -3,9 +3,9 @@ import type { Session } from "next-auth";
 import { unstable_cache } from "next/cache";
 
 import { checkAdminOrOwner } from "@calcom/features/auth/lib/checkAdminOrOwner";
-import { TeamsListing } from "@calcom/features/ee/teams/components/TeamsListing";
+import { TeamsListing } from "./TeamsListing";
 import { TeamRepository } from "@calcom/lib/server/repository/team";
-import { TeamService } from "@calcom/lib/server/service/teamService";
+import { acceptTeamInviteByToken, TeamInviteError } from "@calcom/features/teams/lib/invitations";
 import prisma from "@calcom/prisma";
 
 import { TRPCError } from "@trpc/server";
@@ -39,10 +39,14 @@ export const ServerTeamsListing = async ({
 
   if (token) {
     try {
-      teamNameFromInvite = await TeamService.inviteMemberByToken(token, userId);
+      teamNameFromInvite = await acceptTeamInviteByToken({ token, userId });
     } catch (e) {
       errorMsgFromInvite = "Error while fetching teams";
-      if (e instanceof TRPCError) errorMsgFromInvite = e.message;
+      if (e instanceof TeamInviteError) {
+        errorMsgFromInvite = e.message;
+      } else if (e instanceof TRPCError) {
+        errorMsgFromInvite = e.message;
+      }
     }
   }
 
@@ -58,7 +62,6 @@ export const ServerTeamsListing = async ({
     Main: (
       <TeamsListing
         teams={teams}
-        orgId={orgId ?? null}
         isOrgAdmin={isOrgAdminOrOwner}
         teamNameFromInvite={teamNameFromInvite ?? null}
         errorMsgFromInvite={errorMsgFromInvite}

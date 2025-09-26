@@ -45,7 +45,6 @@ export function PanelCard({
 
   return (
     <div
-      data-testid="panel-card"
       ref={animationParent}
       className={classNames(
         "bg-muted group relative flex w-full flex-col items-center rounded-2xl px-1",

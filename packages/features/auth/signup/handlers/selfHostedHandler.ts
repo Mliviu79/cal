@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { checkPremiumUsername } from "@calcom/ee/common/lib/checkPremiumUsername";
+import { checkPremiumUsername } from "@calcom/lib/ossOrganizations";
 import { sendEmailVerification } from "@calcom/features/auth/lib/verifyEmail";
 import { createOrUpdateMemberships } from "@calcom/features/auth/signup/utils/createOrUpdateMemberships";
 import { hashPassword } from "@calcom/lib/auth/hashPassword";
@@ -135,8 +135,8 @@ export default async function handler(body: Record<string, string>) {
       return NextResponse.json({ message: "A user exists with that username" }, { status: 409 });
     }
     if (IS_PREMIUM_USERNAME_ENABLED) {
-      const checkUsername = await checkPremiumUsername(correctedUsername);
-      if (checkUsername.premium) {
+      const isPremiumUsername = await checkPremiumUsername(correctedUsername);
+      if (isPremiumUsername) {
         return NextResponse.json(
           { message: "Sign up from https://cal.com/signup to claim your premium username" },
           { status: 422 }

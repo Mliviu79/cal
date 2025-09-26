@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { TeamBilling } from "@calcom/ee/billing/teams";
+import { TeamBilling } from "@calcom/lib/billing/ossTeamBilling";
 import prisma from "@calcom/prisma";
 
 const querySchema = z.object({
@@ -31,6 +31,8 @@ async function postHandler(request: NextRequest) {
       },
       select: {
         id: true,
+        name: true,
+        slug: true,
         metadata: true,
         isOrganization: true,
         parentId: true,

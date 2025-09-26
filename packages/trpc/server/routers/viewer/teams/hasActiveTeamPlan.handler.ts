@@ -1,4 +1,4 @@
-import { InternalTeamBilling } from "@calcom/ee/billing/teams/internal-team-billing";
+import { InternalTeamBilling } from "@calcom/features/ee/billing/teams/internal-team-billing";
 import { IS_SELF_HOSTED } from "@calcom/lib/constants";
 import { MembershipRepository } from "@calcom/lib/server/repository/membership";
 import { prisma } from "@calcom/prisma";

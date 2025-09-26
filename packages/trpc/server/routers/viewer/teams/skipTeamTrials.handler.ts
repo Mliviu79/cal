@@ -1,4 +1,4 @@
-import { InternalTeamBilling } from "@calcom/ee/billing/teams/internal-team-billing";
+import { TeamBilling } from "@calcom/lib/billing/ossTeamBilling";
 import { IS_SELF_HOSTED } from "@calcom/lib/constants";
 import logger from "@calcom/lib/logger";
 import { MembershipRepository } from "@calcom/lib/server/repository/membership";
@@ -35,14 +35,9 @@ export const skipTeamTrialsHandler = async ({ ctx }: SkipTeamTrialsOptions) => {
     });
 
     for (const team of ownedTeams) {
-      const teamBillingService = new InternalTeamBilling(team);
-
-      const subscriptionStatus = await teamBillingService.getSubscriptionStatus();
-
-      if (subscriptionStatus === "trialing") {
-        await teamBillingService.endTrial();
-        log.info(`Ended trial for team ${team.id}`);
-      }
+      const teamBillingService = TeamBilling.init(team);
+      // In OSS mode, no trials to end - teams are always active
+      log.info(`Team ${team.id} - no trial to end in OSS mode`);
     }
 
     return { success: true };

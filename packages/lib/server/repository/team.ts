@@ -1,6 +1,5 @@
 import type { z } from "zod";
 
-import { whereClauseForOrgWithSlugOrRequestedSlug } from "@calcom/ee/organizations/lib/orgDomains";
 import logger from "@calcom/lib/logger";
 import type { PrismaClient } from "@calcom/prisma";
 import { prisma } from "@calcom/prisma";
@@ -41,6 +40,18 @@ type GetTeamOrOrgArg<TeamSelect extends Prisma.TeamSelect> = {
 
 const log = logger.getSubLogger({ prefix: ["repository", "team"] });
 
+const buildOrgSlugFilter = (slug: string): Prisma.TeamWhereInput => ({
+  OR: [
+    { slug },
+    {
+      metadata: {
+        path: ["requestedSlug"],
+        equals: slug,
+      },
+    },
+  ],
+});
+
 /**
  * Gets the team or organization with the given slug or id reliably along with parsed metadata.
  */
@@ -73,7 +84,7 @@ async function getTeamOrOrg<TeamSelect extends Prisma.TeamSelect>({
     // We must fetch only the team here.
   } else {
     if (forOrgWithSlug) {
-      where.parent = whereClauseForOrgWithSlugOrRequestedSlug(forOrgWithSlug);
+      where.parent = buildOrgSlugFilter(forOrgWithSlug);
     }
   }
 
@@ -228,7 +239,7 @@ export class TeamRepository {
     return await this.prismaClient.team.findFirst({
       where: {
         slug,
-        parent: parentSlug ? whereClauseForOrgWithSlugOrRequestedSlug(parentSlug) : null,
+        parent: parentSlug ? buildOrgSlugFilter(parentSlug) : null,
       },
       select,
     });

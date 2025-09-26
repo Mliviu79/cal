@@ -1,6 +1,5 @@
 import { _generateMetadata, getTranslate } from "app/_utils";
 
-import UsersAddView from "@calcom/features/ee/users/pages/users-add-view";
 import SettingsHeader from "@calcom/features/settings/appDir/SettingsHeader";
 
 export const generateMetadata = async () =>
@@ -17,7 +16,9 @@ const Page = async () => {
 
   return (
     <SettingsHeader title={t("add_new_user")} description={t("admin_users_add_description")}>
-      <UsersAddView />
+      <div className="border-subtle bg-default max-w-2xl rounded-xl border p-6 text-sm text-subtle">
+        {t("platform_user_add_hint") ?? "Platform administrators can create new users through the standard sign-up or provisioning workflows."}
+      </div>
     </SettingsHeader>
   );
 };

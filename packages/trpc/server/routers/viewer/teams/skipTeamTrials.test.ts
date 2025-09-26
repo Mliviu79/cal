@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
-import { InternalTeamBilling } from "@calcom/ee/billing/teams/internal-team-billing";
+import { TeamBilling } from "@calcom/lib/billing/ossTeamBilling";
 import { MembershipRepository } from "@calcom/lib/server/repository/membership";
 import { prisma } from "@calcom/prisma";
 
@@ -53,11 +53,12 @@ vi.mock("@calcom/lib/server/repository/membership", () => ({
 const mockGetSubscriptionStatus = vi.fn();
 const mockEndTrial = vi.fn().mockResolvedValue(true);
 
-vi.mock("@calcom/ee/billing/teams/internal-team-billing", () => ({
-  InternalTeamBilling: vi.fn().mockImplementation(() => ({
-    getSubscriptionStatus: mockGetSubscriptionStatus,
-    endTrial: mockEndTrial,
-  })),
+vi.mock("@calcom/lib/billing/ossTeamBilling", () => ({
+  TeamBilling: {
+    init: vi.fn(() => ({
+      // OSS billing always returns successful stubs
+    })),
+  },
 }));
 
 describe("skipTeamTrialsHandler", () => {

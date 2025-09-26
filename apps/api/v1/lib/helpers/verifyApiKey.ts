@@ -1,6 +1,6 @@
 import type { NextMiddleware } from "next-api-middleware";
 
-import { LicenseKeySingleton } from "@calcom/ee/common/server/LicenseKeyService";
+import { LicenseKeySingleton } from "@calcom/lib/ossOrganizations";
 import { hashAPIKey } from "@calcom/features/api-keys/lib/apiKeys";
 import { IS_PRODUCTION } from "@calcom/lib/constants";
 import { DeploymentRepository } from "@calcom/lib/server/repository/deployment";

@@ -1,5 +1,5 @@
 import { eventTypeAppMetadataOptionalSchema } from "@calcom/app-store/zod-utils";
-import { scheduleMandatoryReminder } from "@calcom/ee/workflows/lib/reminders/scheduleMandatoryReminder";
+import { scheduleMandatoryReminder } from "@calcom/features/ee/workflows/lib/reminders/scheduleMandatoryReminder";
 import { sendScheduledEmailsAndSMS } from "@calcom/emails";
 import {
   allowDisablingAttendeeConfirmationEmails,
@@ -346,9 +346,6 @@ export async function handleConfirmation(args: {
         },
         bookerUrl,
       };
-      evtOfBooking.startTime = updatedBookings[index].startTime.toISOString();
-      evtOfBooking.endTime = updatedBookings[index].endTime.toISOString();
-      evtOfBooking.uid = updatedBookings[index].uid;
       const isFirstBooking = index === 0;
 
       if (!eventTypeMetadata?.disableStandardEmails?.all?.attendee) {
@@ -366,7 +363,6 @@ export async function handleConfirmation(args: {
         workflows,
         smsReminderNumber: updatedBookings[index].smsReminderNumber,
         calendarEvent: evtOfBooking,
-        hideBranding: !!updatedBookings[index].eventType?.owner?.hideBranding,
         isConfirmedByDefault: true,
         isNormalBookingOrFirstRecurringSlot: isFirstBooking,
         isRescheduleEvent: false,
@@ -577,7 +573,6 @@ export async function handleConfirmation(args: {
           workflows,
           smsReminderNumber: booking.smsReminderNumber,
           calendarEvent: calendarEventForWorkflow,
-          hideBranding: !!updatedBookings[0].eventType?.owner?.hideBranding,
           triggers: [WorkflowTriggerEvents.BOOKING_PAID],
         });
       } catch (error) {

@@ -56,7 +56,11 @@ export function ListItem(props: ListItemProps) {
     props.children
   );
 
-  return href ? <Link href={href}>{element}</Link> : (
+  return href ? (
+    <Link passHref href={href} legacyBehavior>
+      {element}
+    </Link>
+  ) : (
     element
   );
 }
@@ -94,6 +98,7 @@ export function ListLinkItem(props: ListLinkItemProps) {
         disabled ? "hover:bg-muted" : ""
       )}>
       <Link
+        passHref
         href={href}
         className={classNames(
           "text-default flex-grow truncate text-sm",

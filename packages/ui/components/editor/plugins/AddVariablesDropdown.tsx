@@ -1,11 +1,8 @@
 import { useMemo, useState } from "react";
 
 import { useLocale } from "@calcom/lib/hooks/useLocale";
-import useMediaQuery from "@calcom/lib/hooks/useMediaQuery";
 
-import classNames from "../../../classNames";
 import { Dropdown, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../dropdown";
-import { Input } from "../../form";
 import { Icon } from "../../icon";
 
 interface IAddVariablesDropdown {
@@ -19,7 +16,6 @@ interface IAddVariablesDropdown {
 export const AddVariablesDropdown = (props: IAddVariablesDropdown) => {
   const { t } = useLocale();
   const [query, setQuery] = useState("");
-  const isMobile = useMediaQuery("(max-width: 640px)");
 
   const filteredVariables = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -64,15 +60,14 @@ export const AddVariablesDropdown = (props: IAddVariablesDropdown) => {
           )}
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-52">
-        <div className="space-y-2 p-1">
-          <div className="text-muted ml-1 text-left text-xs font-medium tracking-wide">
+      <DropdownMenuContent className="w-96">
+        <div className="p-4">
+          <div className="text-subtle mb-3 text-left text-xs font-medium uppercase tracking-wide">
             {t("add_dynamic_variables")}
           </div>
-          <div>
-            <Input
+          <div className="mb-2 px-2">
+            <input
               type="text"
-              size="sm"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("search_variables")}
@@ -80,30 +75,29 @@ export const AddVariablesDropdown = (props: IAddVariablesDropdown) => {
               className="border-subtle bg-default focus:ring-brand-800 w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-1"
             />
           </div>
-          <div className="max-h-64 overflow-y-auto overflow-x-hidden md:max-h-80">
+          <div className="max-h-64 overflow-y-auto md:max-h-80">
             {filteredVariables.length === 0 ? (
               <div className="text-subtle px-4 py-2 text-center text-sm">{t("no_variables_found")}</div>
             ) : (
               filteredVariables.map((variable) => (
-                <DropdownMenuItem key={variable} className="w-full p-1 hover:ring-0">
-                  <div
+                <DropdownMenuItem key={variable} className="hover:ring-0">
+                  <button
                     key={variable}
-                    className="w-full cursor-pointer rounded-md text-left transition-colors"
+                    type="button"
+                    className="hover:bg-muted w-full rounded-md px-3 py-2 text-left transition-colors"
                     onClick={() => {
                       props.addVariable(t(`${variable}_variable`));
                       setQuery("");
                     }}>
-                    <div className="flex flex-col">
-                      <div
-                        className={classNames(
-                          "text-default font-mono text-sm",
-                          isMobile ? "break-all" : "truncate"
-                        )}>
+                    <div className="flex flex-col space-y-1">
+                      <div className="text-default font-mono text-sm">
                         {`{${t(`${variable}_variable`).toUpperCase().replace(/ /g, "_")}}`}
                       </div>
-                      <div className="text-muted hidden text-xs sm:block">{t(`${variable}_info`)}</div>
+                      <div className="text-muted-foreground hidden text-xs sm:block">
+                        {t(`${variable}_info`)}
+                      </div>
                     </div>
-                  </div>
+                  </button>
                 </DropdownMenuItem>
               ))
             )}
